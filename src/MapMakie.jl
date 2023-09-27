@@ -7,6 +7,16 @@ using LRUCache
 
 export MapAxis
 
+"""
+    MapAxis(args...; origin, kwargs...) -> axis::Axis
+
+Create a new `Makie.Axis` showing OpenStreetMap.
+
+The object returned by this function is a standard `Makie.Axis` and can be used
+to plot additional data like any other `Makie.Axis`. The map is shown in
+WebMercator coordinates normalized to the unit square `[0,1]^2` and shifted by
+`-origin`. Any additional (keyword) arguments are forwarded to `Axis()`.
+"""
 function MapAxis(args...; origin, kwargs...)
     axis = Axis(
         args...;
