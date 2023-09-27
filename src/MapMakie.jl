@@ -16,6 +16,32 @@ The object returned by this function is a standard `Makie.Axis` and can be used
 to plot additional data like any other `Makie.Axis`. The map is shown in
 WebMercator coordinates normalized to the unit square `[0,1]^2` and shifted by
 `-origin`. Any additional (keyword) arguments are forwarded to `Axis()`.
+
+# Example
+```
+function webmercator(lat, lon)
+    return (
+        lon/360 + 0.5,
+        0.5 - log(tand(45+lat/2))/(2π)
+    )
+end
+
+origin = webmercator(1.286770, 103.854307) # The Merlion, Singapore
+f = Figure(resolution = 400 .* (4,3))
+a = MapAxis(
+    f[1,1];
+    origin,
+    limits = (-1,1,-1,1)./40_000,
+)
+scatter!(
+    a,
+    Point2f[(0,0)],
+    color = :red,
+    markersize = 30,
+    strokewidth = 10,
+)
+display(f)
+```
 """
 function MapAxis(args...; origin, kwargs...)
     axis = Axis(
