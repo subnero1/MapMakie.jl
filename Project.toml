@@ -4,7 +4,9 @@ authors = ["Simon Etter <ettersi@users.noreply.github.com>"]
 version = "0.1.0"
 
 [deps]
+Elliptic = "b305315f-e792-5b7a-8f41-49f472929428"
 FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 LRUCache = "8ac3fa9e-de4c-5943-b1dc-09c6b5f20637"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
