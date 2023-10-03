@@ -1,6 +1,36 @@
 ###########################################
 # Web Mercator <--> latitude and longitude
 
+"""
+    webmercator(lat, lon) -> (wmx, wmy)
+
+Convert latitude and longitude to Web Mercator coordinates.
+
+Latitude and longitude are assumed to be in degrees, and the Web Mercator
+coordinates are shifted and scaled such that we have the following identities.
+
+```
+webmercator( 0, 0 ) == (0, 0)
+webmercator(  90, 0 ) == (0,  Inf)
+webmercator( -90, 0 ) == (0, -Inf)
+webmercator( 0,  180 ) == ( 1, 0)
+webmercator( 0, -180 ) == (-1, 0)
+```
+
+This form of the Web Mercator coordinates was chosen because it yields the
+following properties.
+
+- The longitude-to-`wmx` conversion is a linear rather than an affine function
+  (namely `wmx = lon / 180`). This is useful because it means we can convert
+  translations `d_lon` and `d_wmx` using the same function as we use for
+  converting points `lon` and `wmx`.
+
+- It preserves the signs of both the east-west and north-south coordinate pairs,
+  i.e. `sign(lon) == sign(wmx)` and `sign(lat) == sign(wmy)`. This is useful
+  because some Makie ticks functions struggle with inverted axes.
+"""
+webmercator(lat, lon) = (wmx_from_lon(lon), wmy_from_lat(lat))
+
 wmx_from_lon(lon) = lon/180
 lon_from_wmx(wmx) = 180*wmx
 

@@ -7,7 +7,7 @@ using LRUCache
 using Elliptic
 using Unitful
 
-export MapAxis
+export MapAxis, webmercator
 
 include("mapaxis.jl")
 include("coordinate_transformations.jl")
