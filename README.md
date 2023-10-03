@@ -9,28 +9,26 @@ julia> using Pkg; Pkg.add(url="https://github.com/subnero1/MapMakie.jl")
 ## Example Usage
 
 ```julia
-function webmercator(lat, lon)
-    return (
-        lon/360 + 0.5,
-        0.5 - log(tand(45+lat/2))/(2π)
-    )
-end
+using GLMakie, MapMakie, Unitful
 
 origin = webmercator(1.286770, 103.854307) # The Merlion, Singapore
-f = Figure(resolution = 400 .* (4,3))
+f = Figure(resolution = 200 .* (4,3))
 a = MapAxis(
     f[1,1];
     origin,
-    limits = (-1,1,-1,1)./40_000,
+    ticks_coordinates = (:EastingNorthing, u"km"),
+    xlabel = "Easting [km]",
+    ylabel = "Northing [km]",
+    limits = (-1,1,-1,1)./10_000, # Web Mercator units relative to `origin`
 )
 scatter!(
     a,
-    Point2f[(0,0)],
+    Point2f[(0,0)], # Web Mercator units relative to `origin`
     color = :red,
-    markersize = 30,
-    strokewidth = 10,
+    markersize = 15,
+    strokewidth = 6,
 )
-display(f)
+save("/tmp/merlion.png", f)
 ```
 
 ![](README.png)

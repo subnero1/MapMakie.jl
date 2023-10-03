@@ -3,23 +3,27 @@
 
 function assemble_coordinates(;
     origin,
-    coordinate_system = nothing,
+    ticks_coordinates,
     ticks = Makie.automatic,
     xticks = ticks,
     yticks = ticks,
     kwargs...,
 )
-    if isnothing(coordinate_system)
+    if ticks_coordinates == :WebMercator
+        return (; xticks, yticks, kwargs...)
+    end
+
+    if isnothing(ticks_coordinates)
         return kwargs
     end
 
     unit = 1.0
-    if coordinate_system isa Tuple{Any, Any}
-        unit = coordinate_system[2]
-        coordinate_system = coordinate_system[1]
+    if ticks_coordinates isa Tuple{Any, Any}
+        unit = ticks_coordinates[2]
+        ticks_coordinates = ticks_coordinates[1]
     end
 
-    if coordinate_system == :EastingNorthing
+    if ticks_coordinates == :EastingNorthing
         return (;
             xticks = EastingTicks(;
                 origin_wmy = origin[2],
@@ -35,7 +39,7 @@ function assemble_coordinates(;
         )
     end
 
-    error("Unknown coordinate system: $coordinate_system")
+    error("Unknown coordinate system: $ticks_coordinates")
 end
 
 
