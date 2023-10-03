@@ -5,7 +5,7 @@ Create a new `Makie.Axis` showing OpenStreetMap.
 
 The object returned by this function is a standard `Makie.Axis` and can be used
 to plot additional data like any other `Makie.Axis`. The map is shown in
-WebMercator coordinates normalized to the unit square `[0,1]^2` and shifted by
+WebMercator coordinates normalized to the square `[-1,1]^2` and shifted by
 `-origin`. Any additional (keyword) arguments are forwarded to `Axis()`.
 
 # Example
@@ -41,19 +41,12 @@ function MapAxis(
     kwargs...
 )
     kwargs = assemble_coordinates(; origin, coordinate_system, kwargs...)
-
     axis = Axis(
         args...;
         autolimitaspect = 1.0,
-        yreversed = true,
-        limits = ((0,1) .- origin[1], (0,1) .- origin[2]),
-
+        limits = ((-1,1) .- origin[1], (-1,1) .- origin[2]),
         kwargs...,
     )
-
-    if isnothing(coordinate_system)
-        hidedecorations!(axis)
-    end
 
     limits = axis.finallimits[]
     limits = Rect2f(origin .+ limits.origin, limits.widths)
@@ -61,15 +54,15 @@ function MapAxis(
 
     (; zoom, xmin, xmax, ymin, ymax) = tile_indices(limits, resolution)
     img = image!(
-        map_limits(zoom, xmin, xmax) .- origin[1],
-        map_limits(zoom, ymin, ymax) .- origin[2],
+        map_xlimits(zoom, xmin, xmax) .- origin[1],
+        map_ylimits(zoom, ymin, ymax) .- origin[2],
         map_image(; zoom, xmin, xmax, ymin, ymax)
     )
     onany(axis.finallimits, axis.scene.camera.resolution) do limits, resolution
         limits = Rect2f(origin .+ limits.origin, limits.widths)
         (; zoom, xmin, xmax, ymin, ymax) = tile_indices(limits, resolution)
-        img[1][] = map_limits(zoom, xmin, xmax) .- origin[1]
-        img[2][] = map_limits(zoom, ymin, ymax) .- origin[2]
+        img[1][] = map_xlimits(zoom, xmin, xmax) .- origin[1]
+        img[2][] = map_ylimits(zoom, ymin, ymax) .- origin[2]
         img[3][] = map_image(; zoom, xmin, xmax, ymin, ymax)
     end
 
@@ -77,7 +70,7 @@ function MapAxis(
 end
 
 const tile_cache = LRU{Tuple{Int,Int,Int}, Any}(maxsize = Int(1e8), by = Base.summarysize)
-function map_tile(zoom, x, y)
+function map_tile(zoom::Int, x::Int, y::Int)
     @assert 0 <= y <= 1<<zoom-1
     reduced_x = mod(x, 1<<zoom)
     return get!(
@@ -92,18 +85,21 @@ function map_image(; zoom, xmin, xmax, ymin, ymax)
     @sync for y in ymin:ymax, x in xmin:xmax
         @async map[
             256*(x-xmin) .+ (1:256),
-            256*(y-ymin) .+ (1:256),
-        ] .= map_tile(zoom, x, y)'
+            256*(ymax-y) .+ (1:256),
+        ] .= rotr90(map_tile(zoom, x, y))
     end
     return map
 end
 
-map_limits(zoom, min, max) = Float32[min, max+1]./(1<<zoom)
+map_xlimits(zoom, min, max) = [min, max+1] .* 2f0^(1-zoom) .- 1f0
+map_ylimits(zoom, min, max) = 1f0 .- [max+1, min] .* 2f0^(1-zoom)
 
 function tile_indices(limits, resolution)
-    zoom = clamp(round(Int, log2(first(resolution ./ widths(limits)))) - 9, 0, 19)
-    (xmin,ymin) = floor.(Int, 2.0^zoom .* minimum(limits))
-    (xmax,ymax) =  ceil.(Int, 2.0^zoom .* maximum(limits)) .- 1
+    zoom = clamp(round(Int, log2(first(resolution ./ widths(limits)))) - 8, 0, 19)
+    xmin = floor(Int, 2f0^(zoom-1) * (minimum(limits)[1] + 1f0))
+    ymin = floor(Int, 2f0^(zoom-1) * (1f0 - maximum(limits)[2]))
+    xmax =  ceil(Int, 2f0^(zoom-1) * (maximum(limits)[1] + 1f0)) - 1
+    ymax =  ceil(Int, 2f0^(zoom-1) * (1f0 - minimum(limits)[2])) - 1
     (ymin, ymax) = clamp.((ymin, ymax), 0, 1<<zoom-1)
     return (; zoom, xmin, xmax, ymin, ymax)
 end

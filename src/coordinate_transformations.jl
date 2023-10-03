@@ -1,15 +1,15 @@
 ###########################################
 # Web Mercator <--> latitude and longitude
 
-wmx_from_lon(lon) = (lon + 180)/ 360
-lon_from_wmx(wmx) = 360*wmx - 180
+wmx_from_lon(lon) = lon/180
+lon_from_wmx(wmx) = 180*wmx
 
 function wmy_from_lat(lat)
     @assert abs(lat) <= 90
-    return 0.5 - log(tand(lat/2 + 45)) / (2π)
+    return log(tand((lat+90)/2)) / π
 end
 
-lat_from_wmy(wmy) = 2*atand(exp(2π * (0.5 - wmy))) - 90
+lat_from_wmy(wmy) = 2*atand(exp(π * wmy)) - 90
 
 
 ###################################################

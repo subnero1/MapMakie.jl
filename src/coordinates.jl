@@ -72,7 +72,7 @@ function Makie.get_ticks(
     (shifted_north_min, shifted_north_max) = (
         (shifted_wmy_min, shifted_wmy_max)
         .|> shifted_wmy -> shifted_wmy + origin_wmy
-        .|> wmy -> clamp(wmy, 0, 1)
+        .|> wmy -> clamp(wmy, -1, 1)
         .|> wmy -> lat_from_wmy(wmy)
         .|> lat -> north_from_lat(lat)
         .|> north -> (north - origin_north) / ticks.unit
@@ -129,7 +129,7 @@ function Makie.get_ticks(
 
     (east_min, east_max) = (
         (wmx_min, wmx_max)
-        .|> wnx -> lon_from_wmx(wnx + 0.5)
+        .|> wnx -> lon_from_wmx(wnx)
         .|> lon -> east_from_lon(lon, origin_lat)
         .|> east -> east / ticks.unit
     )
@@ -147,7 +147,7 @@ function Makie.get_ticks(
         east
         .|> east -> ticks.unit * east
         .|> east -> lon_from_east(east, origin_lat)
-        .|> lon -> wmx_from_lon(lon) - 0.5
+        .|> lon -> wmx_from_lon(lon)
     )
 
     return ( wmx, labels )
