@@ -1,12 +1,8 @@
 # MapMakie.jl - OpenStreetMap in Makie
 
-## Installation
+## Example
 
-```julia
-julia> using Pkg; Pkg.add(url="https://github.com/subnero1/MapMakie.jl")
-```
-
-## Example Usage
+![](README.png)
 
 ```julia
 using GLMakie, MapMakie, Unitful
@@ -31,4 +27,16 @@ scatter!(
 save("/tmp/merlion.png", f)
 ```
 
-![](README.png)
+## Installation
+
+```julia
+julia> using Pkg; Pkg.add(url="https://github.com/subnero1/MapMakie.jl")
+```
+
+## Technical details
+
+- Dynamically loads map tiles from https://tile.openstreetmap.org/.
+- Caches up to 100 MB of map tiles in memory using [LRUCache.jl](https://github.com/JuliaCollections/LRUCache.jl).
+- Users of this package must adhere to [OpenStreetMap's Tile Usage Policy
+](https://operations.osmfoundation.org/policies/tiles/).
+- Coming soon: offline mode, and better integration with [MapMaths.jl](https://github.com/subnero1/MapMaths.jl).
