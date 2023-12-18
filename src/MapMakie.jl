@@ -1,16 +1,16 @@
 module MapMakie
 
-using Makie
 using FileIO
 using HTTP
 using LRUCache
-using Elliptic
+using Makie
+using MapMaths
 using Unitful
 
-export MapAxis, webmercator
+export MapAxis
 
-include("mapaxis.jl")
-include("coordinate_transformations.jl")
-include("coordinates.jl")
+include("mapped_ticks.jl")
+include("ticks_coordinate.jl")
+include("map_axis.jl")
 
 end # module MapMakie

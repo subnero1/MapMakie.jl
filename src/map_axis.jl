@@ -4,69 +4,48 @@
 Create a new `Axis` showing OpenStreetMaps.
 
 The object returned by this function is a plain `Makie.Axis` and can be used to
-plot additional data like any other `Axis`. The map is shown in Web Mercator
-coordinates (see `webmercator`) and shifted by `-origin`.
+plot additional data like any other `Axis`. The map is shown in
+`MapMaths.WebMercator` coordinates shifted by `-WebMercator(origin)`.
 
 All positional arguments and any keyword arguments other than the ones mentioned
 below are forwarded to `Axis()`.
 
 # Keyword arguments
 
-- `origin`: Origin of the map in Web Mercator coordinates.
+- `origin::MapMaths.Coordinate{2}`: Map origin.
 
   This parameter serves two purposes:
+  1) Avoid the loss of precision that would otherwise be incurred for locations
+     at high latitudes and longitudes due to Makie performing most computations
+     in `Float32`. See also [Loss of precision when plotting large floats in
+     Makie](https://github.com/MakieOrg/Makie.jl/issues/1196) and related issues
+     in Makie.jl.
+  2) Set the origin for the x- and y-ticks if `ticks_coordinate` is `EastNorth`
+     (see `ticks_coordinate` below).
 
-  1) Set the origin for the x- and y-ticks (see `ticks_coordinates` below).
+- `ticks_coordinate = WebMercator`: The coordinate system in which to show the
+  x- and y-ticks.
 
-  2) Avoid the loss of precision that would otherwise be incurred for locations
-     at high latitudes and longitudes due to Makie performing most computations in
-     `Float32`.
-
-  # Example
-
-  An error of `eps(Float32(180))` in the x-component of a Web Mercator
-  coordinate at latitude 0° translates into an easting error of roughly 300
-  meters. This means that with `origin = (0,0)`, locations near `lat = 0°`, `lon
-  = 180°` would generally be rounded by up to 150m. By contrast, if we set
-  `origin = (1,0)`, then rounding in such location is proportional to their
-  distance to `lat = 0°`, `lon = 180°`, which can be much smaller.
-
-  See also [Loss of precision when plotting large floats in Makie](https://github.com/MakieOrg/Makie.jl/issues/1196)
-  and related issues in Makie.jl.
-
-- `ticks_coordinates`: The coordinate system in which to show the x- and y-ticks.
-
-  The following coordinate systems are currently supported:
-
-  - `:WebMercator` (default)
-
-  - `nothing`: Don't show any x- and y-ticks.
-
-  - `:EastingNorthing` or `(:EastingNorthing, unit)` where `unit` can be any of
-    the following.
-
-    - A `Number`. Will be interpreted in meters.
-    - A `Unitful.LengthUnits`
-    - A `Unitfule.Lengths`
+  `ticks_coordinate` can be any subtype of `MapMaths.Coordinate{2}`, or
+  `(MapMaths.EastNorth, unit)` where `unit` is either a plain number denoting meters, a
+  `Unitful.LengthUnits` or a `Unitful.Length`. `EastNorth` ticks are shown
+  relative to `origin`, all other ticks are shown using their absolute values.
 
 # Example
 
 ```
 using GLMakie, MapMakie, Unitful
 
-origin = webmercator(1.286770, 103.854307) # The Merlion, Singapore
-f = Figure(resolution = 200 .* (4,3))
+f = Figure()
 a = MapAxis(
     f[1,1];
-    origin,
-    ticks_coordinates = (:EastingNorthing, u"km"),
-    xlabel = "Easting [km]",
-    ylabel = "Northing [km]",
+    origin = LatLon(1.286770, 103.854307), # Merlion, Singapore
+    ticks_coordinate = (EastNorth, u"km"),
     limits = (-1,1,-1,1)./10_000, # Web Mercator units relative to `origin`
 )
 scatter!(
     a,
-    Point2f[(0,0)], # Web Mercator units relative to `origin`
+    Point2f[(0,0)], # WebMercator coordinates relative to `origin`
     color = :red,
     markersize = 15,
     strokewidth = 6,
@@ -77,19 +56,22 @@ display(f)
 function MapAxis(
     args...;
     origin,
-    ticks_coordinates = :WebMercator,
+    ticks_coordinate = WebMercator,
     kwargs...
 )
-    kwargs = assemble_coordinates(; origin, ticks_coordinates, kwargs...)
+    origin = WebMercator(origin)
+    kwargs = map_ticks_coordinate(;
+        plot_coordinate = WebMercator,
+        ticks_coordinate,
+        origin,
+        kwargs...,
+    )
     axis = Axis(
         args...;
         autolimitaspect = 1.0,
         limits = ((-1,1) .- origin[1], (-1,1) .- origin[2]),
         kwargs...,
     )
-    if isnothing(ticks_coordinates)
-        hidedecorations!(axis)
-    end
 
     limits = axis.finallimits[]
     limits = Rect2f(origin .+ limits.origin, limits.widths)
