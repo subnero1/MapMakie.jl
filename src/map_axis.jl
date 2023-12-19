@@ -26,10 +26,17 @@ below are forwarded to `Axis()`.
 - `ticks_coordinate = WebMercator`: The coordinate system in which to show the
   x- and y-ticks.
 
-  `ticks_coordinate` can be any subtype of `MapMaths.Coordinate{2}`, or
-  `(MapMaths.EastNorth, unit)` where `unit` is either a plain number denoting meters, a
+  Can be any subtype of `MapMaths.Coordinate{2}`, or `(MapMaths.EastNorth,
+  unit)` where `unit` is either a plain number denoting meters, a
   `Unitful.LengthUnits` or a `Unitful.Length`. `EastNorth` ticks are shown
-  relative to `origin`, all other ticks are shown using their absolute values.
+  relative to `origin`, all other ticks are shown using their global values.
+
+- `limits = ((-1,1), (-1,1))`: Axis limits.
+
+  Follows the same format as `Makie.Axis()`, except that any number can also be
+  a `MapMaths.EastWestCoordinate` or `MapMaths.NorthSouthCoordinate` as
+  appropriate. `East` and `North` limits are applied relative to `origin`, all
+  other limits are applied as global values.
 
 # Example
 
@@ -41,7 +48,7 @@ a = MapAxis(
     f[1,1];
     origin = LatLon(1.286770, 103.854307), # Merlion, Singapore
     ticks_coordinate = (EastNorth, u"km"),
-    limits = (-1,1,-1,1)./10_000, # Web Mercator units relative to `origin`
+    limits = (East.(2e3.*(-1,1)), North.(2e3.*(-1,1))
 )
 scatter!(
     a,
@@ -57,6 +64,7 @@ function MapAxis(
     args...;
     origin,
     ticks_coordinate = WebMercator,
+    limits = ((-1,1), (-1,1)),
     kwargs...
 )
     origin = WebMercator(origin)
@@ -69,7 +77,7 @@ function MapAxis(
     axis = Axis(
         args...;
         autolimitaspect = 1.0,
-        limits = ((-1,1) .- origin[1], (-1,1) .- origin[2]),
+        limits = convert_limits(WebMercator, limits; origin),
         kwargs...,
     )
 

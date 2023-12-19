@@ -11,6 +11,7 @@ export MapAxis
 
 include("mapped_ticks.jl")
 include("ticks_coordinate.jl")
+include("limits.jl")
 include("map_axis.jl")
 
 end # module MapMakie
