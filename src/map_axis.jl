@@ -42,13 +42,12 @@ below are forwarded to `Axis()`.
 
 ```
 using GLMakie, MapMakie, Unitful
-
 f = Figure()
 a = MapAxis(
     f[1,1];
     origin = LatLon(1.286770, 103.854307), # Merlion, Singapore
     ticks_coordinate = (EastNorth, u"km"),
-    limits = (East.(2e3.*(-1,1)), North.(2e3.*(-1,1))
+    limits = (East.(2e3.*(-1,1)), North.(2e3.*(-1,1))),
 )
 scatter!(
     a,
