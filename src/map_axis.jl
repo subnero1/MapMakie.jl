@@ -41,7 +41,7 @@ below are forwarded to `Axis()`.
 # Example
 
 ```
-using GLMakie, MapMakie, Unitful
+using GLMakie, MapMakie, MapMaths, Unitful
 f = Figure()
 a = MapAxis(
     f[1,1];

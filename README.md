@@ -7,7 +7,7 @@ Plot on OpenStreetMaps using Makie.
 ![](README.png)
 
 ```julia
-using GLMakie, MapMakie, Unitful
+using GLMakie, MapMakie, MapMaths, Unitful
 f = Figure()
 a = MapAxis(
     f[1,1];
