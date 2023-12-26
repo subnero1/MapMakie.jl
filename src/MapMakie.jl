@@ -2,6 +2,7 @@ module MapMakie
 
 using FileIO
 using HTTP
+using IntervalSets
 using LRUCache
 using Makie
 using MapMaths
