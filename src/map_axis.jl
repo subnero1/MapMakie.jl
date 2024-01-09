@@ -39,7 +39,7 @@ below are forwarded to `Axis()`.
   other limits are applied as global values. Plain numbers are interpreted as
   WebMercator coordinates.
 
-- `tile_provider - TileProviders.OpenStreetMap()`: Any tile provider from the
+- `tile_provider = TileProviders.OpenStreetMap()`: Any tile provider from the
   `TileProviders` package.
 
 # Example
