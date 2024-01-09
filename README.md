@@ -1,6 +1,6 @@
 # MapMakie.jl
 
-Plot on OpenStreetMaps using Makie.
+Plot on OpenStreetMap using Makie.
 
 ## Example
 
@@ -34,7 +34,7 @@ save("/tmp/merlion.png", f)
 MapAxis(args...; origin, kwargs...) -> axis::Makie.Axis
 ```
 
-Create a new `Axis` showing OpenStreetMaps.
+Create a new `Axis` showing OpenStreetMap.
 
 The object returned by this function is a plain `Makie.Axis` and can be used to plot additional data like any other `Axis`. The map is shown in `MapMaths.WebMercator` coordinates shifted by `-WebMercator(origin)`.
 
