@@ -9,7 +9,7 @@ using MapMaths
 using TileProviders
 using Unitful
 
-export MapAxis, OpenStreetMap
+export MapAxis
 
 include("mapped_ticks.jl")
 include("ticks_coordinate.jl")
