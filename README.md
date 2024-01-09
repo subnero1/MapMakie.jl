@@ -56,6 +56,8 @@ All positional arguments and any keyword arguments other than the ones mentioned
 
   Follows the same format as `Makie.Axis()`, except that any number can also be a `MapMaths.EastWestCoordinate` or `MapMaths.NorthSouthCoordinate` as appropriate. `East` and `North` limits are applied relative to `origin`, all other limits are applied as global values.
 
+- `tile_provider = TileProviders.OpenStreetMap()`: Any tile provider from the `TileProviders` package.
+
 ## Technical details
 
 MapMakie dynamically loads the map tiles required from https://tile.openstreetmap.org/. Users of this package must therefore adhere to [OpenStreetMap's Tile Usage Policy](https://operations.osmfoundation.org/policies/tiles/). The most-recently used 100 MB of map tiles are cached in memory using [LRUCache.jl](https://github.com/JuliaCollections/LRUCache.jl).
