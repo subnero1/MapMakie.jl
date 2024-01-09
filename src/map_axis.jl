@@ -39,21 +39,8 @@ below are forwarded to `Axis()`.
   other limits are applied as global values. Plain numbers are interpreted as
   WebMercator coordinates.
 
-- `tile_provider - OpenStreetMap()`: Where to get map tiles from.
-
-  `tile_provider` must be such that `FileIO.load(tile_provider(zoom, x, y)`
-  loads the map tile covering
-  ```
-  map(
-      (x,y) -> MapMaths.WebMercator((0.5^(zoom-1) .* (x,y) .- 1)...),
-      x .+ (0,1),
-      y .+ (0,1)
-  )
-  ```
-
-  MapMakie provides the following tile providers:
-
-  - `OpenStreetMap()`: Load map tiles from the OpenStreetMap tile server.
+- `tile_provider - TileProviders.OpenStreetMap()`: Any tile provider from the
+  `TileProviders` package.
 
 # Example
 
@@ -119,21 +106,14 @@ function MapAxis(
     return axis
 end
 
-"""
-    OpenStreetMap()
-
-Load map tiles from the OpenStreetMap tile server.
-"""
-OpenStreetMap() = (zoom, x, y) -> HTTP.URI("https://tile.openstreetmap.org/$zoom/$x/$y.png")
-
-const tile_cache = LRU{Tuple{Int,Int,Int}, Any}(maxsize = Int(1e8), by = Base.summarysize)
+const tile_cache = LRU{Tuple{Any,Int,Int,Int}, Any}(maxsize = Int(1e8), by = Base.summarysize)
 function map_tile(tile_provider, zoom::Int, x::Int, y::Int)
     @assert 0 <= y <= 1<<zoom-1
     reduced_x = mod(x, 1<<zoom)
     return get!(
-        () -> load(tile_provider(zoom, reduced_x, y)),
+        () -> load(HTTP.URI(geturl(tile_provider, reduced_x, y, zoom))),
         tile_cache,
-        (zoom, reduced_x, y),
+        (tile_provider, zoom, reduced_x, y),
     )
 end
 

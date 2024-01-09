@@ -6,6 +6,7 @@ using IntervalSets
 using LRUCache
 using Makie
 using MapMaths
+using TileProviders
 using Unitful
 
 export MapAxis, OpenStreetMap
