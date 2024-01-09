@@ -36,7 +36,8 @@ below are forwarded to `Axis()`.
   Follows the same format as `Makie.Axis()`, except that any number can also be
   a `MapMaths.EastWestCoordinate` or `MapMaths.NorthSouthCoordinate` as
   appropriate. `East` and `North` limits are applied relative to `origin`, all
-  other limits are applied as global values.
+  other limits are applied as global values. Plain numbers are interpreted as
+  WebMercator coordinates.
 
 - `tile_provider - OpenStreetMap()`: Where to get map tiles from.
 
