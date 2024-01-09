@@ -53,6 +53,7 @@ function map_ticks_coordinate(
             ticks_to_plot = x -> plot_ns(ticks_ns(x) - ticks_ns(origin))[],
         ),
         axis_labels(ticks_coordinate)...,
+        kwargs...,
     )
 end
 
