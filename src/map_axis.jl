@@ -38,6 +38,22 @@ below are forwarded to `Axis()`.
   appropriate. `East` and `North` limits are applied relative to `origin`, all
   other limits are applied as global values.
 
+- `tile_provider - OpenStreetMap()`: Where to get map tiles from.
+
+  `tile_provider` must be such that `FileIO.load(tile_provider(zoom, x, y)`
+  loads the map tile covering
+  ```
+  map(
+      (x,y) -> MapMaths.WebMercator((0.5^(zoom-1) .* (x,y) .- 1)...),
+      x .+ (0,1),
+      y .+ (0,1)
+  )
+  ```
+
+  MapMakie provides the following tile providers:
+
+  - `OpenStreetMap()`: Load map tiles from the OpenStreetMap tile server.
+
 # Example
 
 ```
@@ -62,6 +78,7 @@ display(f)
 function MapAxis(
     args...;
     origin,
+    tile_provider = OpenStreetMap(),
     ticks_coordinate = WebMercator,
     limits = ((-1,1), (-1,1)),
     kwargs...
@@ -88,37 +105,44 @@ function MapAxis(
     img = image!(
         ClosedInterval((map_xlimits(zoom, xmin, xmax) .- origin[1])...),
         ClosedInterval((map_ylimits(zoom, ymin, ymax) .- origin[2])...),
-        map_image(; zoom, xmin, xmax, ymin, ymax)
+        map_image(; tile_provider, zoom, xmin, xmax, ymin, ymax)
     )
     onany(axis.finallimits, axis.scene.camera.resolution) do limits, resolution
         limits = Rect2f(origin .+ limits.origin, limits.widths)
         (; zoom, xmin, xmax, ymin, ymax) = tile_indices(limits, resolution)
         img[1][] = ClosedInterval((map_xlimits(zoom, xmin, xmax) .- origin[1])...)
         img[2][] = ClosedInterval((map_ylimits(zoom, ymin, ymax) .- origin[2])...)
-        img[3][] = map_image(; zoom, xmin, xmax, ymin, ymax)
+        img[3][] = map_image(; tile_provider, zoom, xmin, xmax, ymin, ymax)
     end
 
     return axis
 end
 
+"""
+    OpenStreetMap()
+
+Load map tiles from the OpenStreetMap tile server.
+"""
+OpenStreetMap() = (zoom, x, y) -> HTTP.URI("https://tile.openstreetmap.org/$zoom/$x/$y.png")
+
 const tile_cache = LRU{Tuple{Int,Int,Int}, Any}(maxsize = Int(1e8), by = Base.summarysize)
-function map_tile(zoom::Int, x::Int, y::Int)
+function map_tile(tile_provider, zoom::Int, x::Int, y::Int)
     @assert 0 <= y <= 1<<zoom-1
     reduced_x = mod(x, 1<<zoom)
     return get!(
-        () -> load(HTTP.URI("https://tile.openstreetmap.org/$zoom/$reduced_x/$y.png")),
+        () -> load(tile_provider(zoom, reduced_x, y)),
         tile_cache,
         (zoom, reduced_x, y),
     )
 end
 
-function map_image(; zoom, xmin, xmax, ymin, ymax)
+function map_image(; tile_provider, zoom, xmin, xmax, ymin, ymax)
     map = Matrix{RGBf}(undef, 256*(xmax-xmin+1), 256*(ymax-ymin+1))
     @sync for y in ymin:ymax, x in xmin:xmax
         @async map[
             256*(x-xmin) .+ (1:256),
             256*(ymax-y) .+ (1:256),
-        ] .= rotr90(map_tile(zoom, x, y))
+        ] .= rotr90(map_tile(tile_provider, zoom, x, y))
     end
     return map
 end

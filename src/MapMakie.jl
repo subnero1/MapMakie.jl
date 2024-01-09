@@ -8,7 +8,7 @@ using Makie
 using MapMaths
 using Unitful
 
-export MapAxis
+export MapAxis, OpenStreetMap
 
 include("mapped_ticks.jl")
 include("ticks_coordinate.jl")
