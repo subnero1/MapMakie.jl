@@ -1,7 +1,7 @@
 name = "MapMakie"
 uuid = "fe52baaf-6d3a-4a5f-a57b-73f45372fb58"
 authors = ["Simon Etter <ettersi@users.noreply.github.com>"]
-version = "0.1.1"
+version = "0.1.2"
 
 [deps]
 FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
