@@ -89,7 +89,7 @@ function MapAxis(
     limits = Rect2f(origin .+ limits.origin, limits.widths)
     resolution = axis.scene.camera.resolution[]
 
-    (; zoom, xmin, xmax, ymin, ymax) = tile_indices(limits, resolution)
+    (; zoom, xmin, xmax, ymin, ymax) = tile_indices(limits, resolution; max_zoom = TileProviders.max_zoom(tile_provider))
     img = image!(
         ClosedInterval((map_xlimits(zoom, xmin, xmax) .- origin[1])...),
         ClosedInterval((map_ylimits(zoom, ymin, ymax) .- origin[2])...),
@@ -97,7 +97,7 @@ function MapAxis(
     )
     onany(axis.finallimits, axis.scene.camera.resolution) do limits, resolution
         limits = Rect2f(origin .+ limits.origin, limits.widths)
-        (; zoom, xmin, xmax, ymin, ymax) = tile_indices(limits, resolution)
+        (; zoom, xmin, xmax, ymin, ymax) = tile_indices(limits, resolution; max_zoom = TileProviders.max_zoom(tile_provider))
         img[1][] = ClosedInterval((map_xlimits(zoom, xmin, xmax) .- origin[1])...)
         img[2][] = ClosedInterval((map_ylimits(zoom, ymin, ymax) .- origin[2])...)
         img[3][] = map_image(; tile_provider, zoom, xmin, xmax, ymin, ymax)
@@ -131,8 +131,8 @@ end
 map_xlimits(zoom, min, max) = (min, max+1) .* 2f0^(1-zoom) .- 1f0
 map_ylimits(zoom, min, max) = 1f0 .- (max+1, min) .* 2f0^(1-zoom)
 
-function tile_indices(limits, resolution)
-    zoom = clamp(round(Int, log2(first(resolution ./ widths(limits)))) - 7, 0, 19)
+function tile_indices(limits, resolution; max_zoom = 19)
+    zoom = clamp(round(Int, log2(first(resolution ./ widths(limits)))) - 7, 0, max_zoom)
     xmin = floor(Int, 2f0^(zoom-1) * (minimum(limits)[1] + 1f0))
     ymin = floor(Int, 2f0^(zoom-1) * (1f0 - maximum(limits)[2]))
     xmax =  ceil(Int, 2f0^(zoom-1) * (maximum(limits)[1] + 1f0)) - 1
