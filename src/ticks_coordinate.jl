@@ -1,7 +1,7 @@
 """
     map_ticks_coordinate(;
         plot_coordinate,
-        [ticks_coordinate | (ticks_coordinate = MapMaths.EastNorth, unit)],
+        [ticks_coordinate | (MapMaths.EastNorth, unit) | unit],
         origin,
         xticks = Makie.automatic,
         yticks = Makie.automatic,
@@ -80,6 +80,14 @@ function map_ticks_coordinate(
     kwargs...,
 )
     return map_ticks_coordinate(plot_coordinate, ticks_coordinate, unit*u"m"; kwargs...)
+end
+
+function map_ticks_coordinate(
+    plot_coordinate::Type{<:Coordinate{2}},
+    unit::Union{Unitful.LengthUnits, Unitful.Length};
+    kwargs...,
+)
+    return map_ticks_coordinate(plot_coordinate, EastNorth, unit; kwargs...)
 end
 
 function map_ticks_coordinate(
