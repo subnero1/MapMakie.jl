@@ -98,8 +98,8 @@ function MapAxis(
     onany(axis.finallimits, axis.scene.camera.resolution) do limits, resolution
         limits = Rect2f(origin .+ limits.origin, limits.widths)
         (; zoom, xmin, xmax, ymin, ymax) = tile_indices(limits, resolution; max_zoom = TileProviders.max_zoom(tile_provider))
-        img[1][] = ClosedInterval((map_xlimits(zoom, xmin, xmax) .- origin[1])...)
-        img[2][] = ClosedInterval((map_ylimits(zoom, ymin, ymax) .- origin[2])...)
+        img[1][] = ClosedInterval((map_xlimits(zoom, xmin, xmax) .- origin[1])...) |> Makie.to_endpoints
+        img[2][] = ClosedInterval((map_ylimits(zoom, ymin, ymax) .- origin[2])...) |> Makie.to_endpoints
         img[3][] = map_image(; tile_provider, zoom, xmin, xmax, ymin, ymax)
     end
 
